@@ -94,7 +94,7 @@ final class Container implements ContainerInterface
     public function get(string $id)
     {
         if ($this->hasDefinition($id)) {
-            return $this->definitions[$id];
+            return $this->definitions[$id]->resolve($this);
         }
         if ($this->canReflect($id)) {
             return (ReflectionServiceFactory::forClass($id))($this);
