@@ -21,7 +21,7 @@ use Psr\Container\ContainerInterface;
 /**
  * Class Container.
  */
-final class Container implements ContainerInterface
+class Container implements ContainerInterface
 {
     /**
      * When enabled, lazy binding allows you to pass classnames to your
