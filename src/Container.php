@@ -195,10 +195,12 @@ final class Container implements ContainerInterface
     /**
      * @return $this
      */
-    public function alias(string $id, string $alias): Container
+    public function alias(string $id, string ...$aliases): Container
     {
         $definition = $this->getOrCreateDefinition($id);
-        $this->definitions[$alias] = $definition;
+        foreach ($aliases as $alias) {
+            $this->definitions[$alias] = $definition;
+        }
 
         return $this;
     }
