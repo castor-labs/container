@@ -35,9 +35,14 @@ final class Container implements ContainerInterface
      */
     public const EXTRA_LAZY_BINDING = 2;
     /**
-     * When enabled, shared mode caches all the resolutions by default.
+     * When enabled, cache mode caches all the resolutions by default.
      */
-    public const SHARED_MODE = 4;
+    public const CACHE_MODE = 4;
+    /**
+     * When enabled, the container is registered in the container as a service
+     * automatically under the PSR interface.
+     */
+    public const REGISTER_CONTAINER = 8;
 
     private int $flags;
     /**
@@ -52,6 +57,9 @@ final class Container implements ContainerInterface
     {
         $this->flags = $flags;
         $this->definitions = [];
+        if (($this->flags & self::REGISTER_CONTAINER) !== 0) {
+            $this->register(ContainerInterface::class, $this);
+        }
     }
 
     public static function boot(int $flags = 7): Container
@@ -124,7 +132,7 @@ final class Container implements ContainerInterface
      */
     public function register(string $abstract, $concrete = null): Container
     {
-        $cached = ($this->flags & self::SHARED_MODE) !== 0;
+        $cached = ($this->flags & self::CACHE_MODE) !== 0;
         $definition = $this->getOrCreateDefinition($abstract);
         if ($definition->hasFactory()) {
             throw new ContainerError(sprintf(
@@ -249,7 +257,7 @@ final class Container implements ContainerInterface
         }
         $definition = new ServiceDefinition(
             $abstract,
-            ($this->flags & self::SHARED_MODE) !== 0,
+            ($this->flags & self::CACHE_MODE) !== 0,
         );
         $this->definitions[$abstract] = $definition;
 
