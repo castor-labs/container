@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 namespace Castor;
 
+use Closure;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -38,10 +39,10 @@ class ReflectionFactoryTest extends TestCase
     public function testItResolvesFromContainer(): void
     {
         $container = $this->createMock(ContainerInterface::class);
-        $container->expects(self::once())
+        $container->expects(self::exactly(4))
             ->method('has')
-            ->with(Foo::class)
-            ->willReturn(true)
+            ->withConsecutive([Foo::class], ['boo'], ['num'], ['check'])
+            ->willReturnOnConsecutiveCalls(true, false, false, false)
         ;
         $container->expects(self::once())
             ->method('get')
@@ -78,6 +79,32 @@ class ReflectionFactoryTest extends TestCase
         $this->expectException(ContainerError::class);
         $factory($container);
     }
+
+    public function testItIgnoresOptionalClosure(): void
+    {
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects(self::once())
+            ->method('has')
+            ->with('closure')
+            ->willReturn(false)
+        ;
+        $factory = ReflectionServiceFactory::forClass(OptionalClosure::class);
+        $instance = $factory($container);
+        self::assertInstanceOf(OptionalClosure::class, $instance);
+    }
+
+    public function testItThrowsExceptionOnRequiredClosure(): void
+    {
+        $container = $this->createMock(ContainerInterface::class);
+        $container->expects(self::once())
+            ->method('has')
+            ->with('closure')
+            ->willReturn(false)
+        ;
+        $factory = ReflectionServiceFactory::forClass(RequiredClosure::class);
+        $this->expectException(ContainerError::class);
+        $factory($container);
+    }
 }
 
 class Foo
@@ -109,5 +136,19 @@ class DefaultValue
     public function __construct($hello)
     {
         $this->hello = $hello;
+    }
+}
+
+class OptionalClosure
+{
+    public function __construct(Closure $closure = null)
+    {
+    }
+}
+
+class RequiredClosure
+{
+    public function __construct(Closure $closure)
+    {
     }
 }

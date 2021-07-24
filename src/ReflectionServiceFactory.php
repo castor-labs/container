@@ -21,6 +21,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionNamedType;
 use ReflectionParameter;
 
 /**
@@ -92,16 +93,17 @@ class ReflectionServiceFactory
     protected function resolveParameter(ContainerInterface $container, ReflectionParameter $param)
     {
         $type = $param->getType();
+        $service = $this->determineServiceName($param);
         $e = null;
-        if (null !== $type && !$type->isBuiltin() && $container->has($type->getName())) {
+        if (null !== $service && $container->has($service)) {
             try {
-                return $container->get($type->getName());
+                return $container->get($service);
             } catch (NotFoundExceptionInterface $e) {
                 // Continue if not found
             } catch (ContainerExceptionInterface $e) {
-                throw new ContainerError(sprintf(
-                    'Underlying container could not resolve service of type %s',
-                    $type->getName()
+                $e = new ContainerError(sprintf(
+                    'Underlying container could not resolve service "%s"',
+                    $service
                 ), 0, $e);
             }
         }
@@ -127,7 +129,7 @@ class ReflectionServiceFactory
         );
 
         if (null === $type) {
-            throw new ContainerError($error.' Try type-hinting arguments to help reflection resolution or register a proper factory in the container.');
+            throw new ContainerError($error.' Try type-hinting arguments to help reflection resolution or register a proper factory in the container.', 0, $e);
         }
 
         throw new ContainerError(sprintf(
@@ -135,5 +137,23 @@ class ReflectionServiceFactory
             $error,
             $param->getType()
         ), 0, $e);
+    }
+
+    private function determineServiceName(ReflectionParameter $param): ?string
+    {
+        $type = $param->getType();
+        // If we don't have a reflection named type or if the type is built-in the only option for resolving is passing the param name.
+        if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
+            return $param->getName();
+        }
+        $typeName = $type->getName();
+        if ('Closure' === $typeName || 'stdClass' === $typeName) {
+            return $param->getName();
+        }
+        if (class_exists($typeName) || interface_exists($typeName)) {
+            return $typeName;
+        }
+
+        return null;
     }
 }

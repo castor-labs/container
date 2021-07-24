@@ -17,6 +17,7 @@ declare(strict_types=1);
 namespace Castor;
 
 use Psr\Container\ContainerInterface;
+use Throwable;
 
 /**
  * Class Container.
@@ -93,14 +94,11 @@ class Container implements ContainerInterface
      */
     public function get(string $id)
     {
-        if ($this->hasDefinition($id)) {
-            return $this->definitions[$id]->resolve($this);
+        try {
+            return $this->resolve($id);
+        } catch (Throwable $e) {
+            throw new ContainerError('Could not resolve service '.$id, 0, $e);
         }
-        if ($this->canReflect($id)) {
-            return (ReflectionServiceFactory::forClass($id))($this);
-        }
-
-        throw new ContainerEntryNotFound($id);
     }
 
     /**
@@ -249,6 +247,23 @@ class Container implements ContainerInterface
         $provider($this);
 
         return $this;
+    }
+
+    /**
+     * @throws Throwable
+     *
+     * @return mixed
+     */
+    private function resolve(string $id)
+    {
+        if ($this->hasDefinition($id)) {
+            return $this->definitions[$id]->resolve($this);
+        }
+        if ($this->canReflect($id)) {
+            return (ReflectionServiceFactory::forClass($id))($this);
+        }
+
+        throw new ContainerEntryNotFound($id);
     }
 
     private function getOrCreateDefinition(string $abstract): ServiceDefinition

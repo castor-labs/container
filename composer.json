@@ -24,17 +24,10 @@
             "Castor\\": "tests"
         }
     },
-    "scripts": {
-        "fix": "php-cs-fixer fix",
-        "lint": "php-cs-fixer fix --dry-run -v",
-        "test": "XDEBUG_MODE=coverage phpunit --testdox --coverage-text",
-        "types": "psalm --stats --no-cache --show-info=true"
-    },
     "require-dev": {
         "roave/security-advisories": "dev-latest",
         "friendsofphp/php-cs-fixer": "^3.0",
         "phpunit/phpunit": "^9.5",
-        "vimeo/psalm": "^4.6",
-        "symfony/var-dumper": "^5.3"
+        "vimeo/psalm": "^4.6"
     }
 }
