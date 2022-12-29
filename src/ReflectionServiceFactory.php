@@ -19,10 +19,6 @@ namespace Castor;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionNamedType;
-use ReflectionParameter;
 
 /**
  * Class ReflectionServiceFactory is an callable class that instantiates a
@@ -46,8 +42,8 @@ class ReflectionServiceFactory
     public function __invoke(ContainerInterface $container)
     {
         try {
-            $class = new ReflectionClass($this->class);
-        } catch (ReflectionException $e) {
+            $class = new \ReflectionClass($this->class);
+        } catch (\ReflectionException $e) {
             throw new ContainerError(sprintf('Could not reflect class %s', $this->class), 0, $e);
         }
         $constructor = $class->getConstructor();
@@ -65,7 +61,7 @@ class ReflectionServiceFactory
 
         try {
             return $class->newInstance(...$args);
-        } catch (ReflectionException $e) {
+        } catch (\ReflectionException $e) {
             throw new ContainerError(sprintf('Error while instantiating class %s', $this->class), 0, $e);
         }
     }
@@ -87,10 +83,11 @@ class ReflectionServiceFactory
 
     /**
      * @return mixed
+     *
      * @psalm-suppress UndefinedMethod
      * @psalm-suppress InvalidCatch
      */
-    protected function resolveParameter(ContainerInterface $container, ReflectionParameter $param)
+    protected function resolveParameter(ContainerInterface $container, \ReflectionParameter $param)
     {
         $type = $param->getType();
         $service = $this->determineServiceName($param);
@@ -110,7 +107,7 @@ class ReflectionServiceFactory
         if ($param->isDefaultValueAvailable()) {
             try {
                 return $param->getDefaultValue();
-            } catch (ReflectionException $e) {
+            } catch (\ReflectionException $e) {
             }
         }
         if ($param->isOptional()) {
@@ -139,18 +136,22 @@ class ReflectionServiceFactory
         ), 0, $e);
     }
 
-    private function determineServiceName(ReflectionParameter $param): ?string
+    private function determineServiceName(\ReflectionParameter $param): ?string
     {
         $type = $param->getType();
+
         // If we don't have a reflection named type or if the type is built-in the only option for resolving is passing the param name.
-        if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
+        if (!$type instanceof \ReflectionNamedType || $type->isBuiltin()) {
             return $param->getName();
         }
+
         $typeName = $type->getName();
+
         if ('Closure' === $typeName || 'stdClass' === $typeName) {
             return $param->getName();
         }
-        if (class_exists($typeName) || interface_exists($typeName)) {
+
+        if (interface_exists($typeName) || class_exists($typeName)) {
             return $typeName;
         }
 

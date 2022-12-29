@@ -24,19 +24,23 @@ use Psr\Container\ContainerInterface;
 class ServiceDefinition
 {
     private string $id;
+
     /**
      * @psalm-var null|callable(ContainerInterface): mixed
      */
     private $factory;
     private bool $cache;
+
     /**
      * @var mixed
      */
     private $instance;
+
     /**
      * @psalm-var array<int,callable(mixed, ContainerInterface): void>
      */
     private array $inflectors;
+
     /**
      * @psalm-var array<int,callable(mixed, ContainerInterface): mixed>
      */

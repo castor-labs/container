@@ -16,7 +16,6 @@ declare(strict_types=1);
 
 namespace Castor;
 
-use Closure;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -24,6 +23,7 @@ use Psr\Container\ContainerInterface;
  * Class ReflectionFactoryTest.
  *
  * @internal
+ *
  * @coversNothing
  */
 class ReflectionFactoryTest extends TestCase
@@ -141,14 +141,14 @@ class DefaultValue
 
 class OptionalClosure
 {
-    public function __construct(Closure $closure = null)
+    public function __construct(\Closure $closure = null)
     {
     }
 }
 
 class RequiredClosure
 {
-    public function __construct(Closure $closure)
+    public function __construct(\Closure $closure)
     {
     }
 }

@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
+ *
  * @coversNothing
  */
 class ContainerTest extends TestCase

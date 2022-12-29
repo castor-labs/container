@@ -17,7 +17,6 @@ declare(strict_types=1);
 namespace Castor;
 
 use Psr\Container\ContainerInterface;
-use Throwable;
 
 /**
  * Class Container.
@@ -29,16 +28,19 @@ class Container implements ContainerInterface
      * register calls that will be resolved using reflection.
      */
     public const LAZY_BINDING = 1;
+
     /**
      * When enabled, extra lazy binding tries to resolve any class being fetched
      * from the container using reflection, even if it was not explicitly
      * registered using the register method.
      */
     public const EXTRA_LAZY_BINDING = 2;
+
     /**
      * When enabled, cache mode caches all the resolutions by default.
      */
     public const CACHE_MODE = 4;
+
     /**
      * When enabled, the container is registered in the container as a service
      * automatically under the PSR interface.
@@ -46,6 +48,7 @@ class Container implements ContainerInterface
     public const REGISTER_CONTAINER = 8;
 
     private int $flags;
+
     /**
      * @var array<string,ServiceDefinition>
      */
@@ -96,7 +99,7 @@ class Container implements ContainerInterface
     {
         try {
             return $this->resolve($id);
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             throw new ContainerError('Could not resolve service '.$id, 0, $e);
         }
     }
@@ -204,9 +207,21 @@ class Container implements ContainerInterface
     }
 
     /**
-     * Tags a group of services with another identifier.
+     * Binds an interface to an implementation.
      *
-     * @param string ...$ids
+     * @param class-string $interface
+     *
+     * @return $this
+     */
+    public function bind(string $interface, string $implementation): Container
+    {
+        $this->alias($implementation, $interface);
+
+        return $this;
+    }
+
+    /**
+     * Tags a group of services with another identifier.
      *
      * @return $this
      */
@@ -226,8 +241,6 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @param string ...$ids
-     *
      * @return $this
      */
     public function refresh(string ...$ids): Container
@@ -250,9 +263,9 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @throws Throwable
-     *
      * @return mixed
+     *
+     * @throws \Throwable
      */
     private function resolve(string $id)
     {

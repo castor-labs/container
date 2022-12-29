@@ -1,0 +1,17 @@
+version: '3.8'
+
+name: castor.container
+
+services:
+
+  lib:
+    image: castor/container:dev
+    build:
+      context: .castor/docker
+      dockerfile: ./lib/Dockerfile
+      target: dev
+    container_name: castor.container.lib
+    working_dir: /castor/lib
+    volumes:
+      - .:/castor/lib
+    user: castor

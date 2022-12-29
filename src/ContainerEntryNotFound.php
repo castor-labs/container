@@ -17,12 +17,11 @@ declare(strict_types=1);
 namespace Castor;
 
 use Psr\Container\NotFoundExceptionInterface;
-use RuntimeException;
 
 /**
  * Class ServiceNotFound.
  */
-class ContainerEntryNotFound extends RuntimeException implements NotFoundExceptionInterface
+class ContainerEntryNotFound extends \RuntimeException implements NotFoundExceptionInterface
 {
     public static function forService(string $id): ContainerEntryNotFound
     {

@@ -17,11 +17,10 @@ declare(strict_types=1);
 namespace Castor;
 
 use Psr\Container\ContainerExceptionInterface;
-use RuntimeException;
 
 /**
  * Class ResolutionError.
  */
-class ContainerError extends RuntimeException implements ContainerExceptionInterface
+class ContainerError extends \RuntimeException implements ContainerExceptionInterface
 {
 }
